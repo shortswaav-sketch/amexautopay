@@ -1,0 +1,62 @@
+import telebot
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+TOKEN = "YOUR_BOT_TOKEN"
+bot = telebot.TeleBot("8873516040:AAHGWdfJPOdr-kpMKvb3ZF3m0NZjWuAeT3E")
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("💳 Deposit Now", callback_data="deposit"))
+    bot.send_message(
+        message.chat.id,
+        "👋 Welcome!\n\nChoose an option:",
+        reply_markup=markup
+    )
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback(call):
+
+    if call.data == "deposit":
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton("💵 7 Days - $35", callback_data="plan7"))
+        markup.add(InlineKeyboardButton("💵 15 Days - $70", callback_data="plan15"))
+        markup.add(InlineKeyboardButton("💵 30 Days - $120", callback_data="plan30"))
+
+        bot.edit_message_text(
+            "💰 Choose Your Plan:",
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=markup
+        )
+
+    elif call.data in ["plan7", "plan15", "plan30"]:
+
+        plans = {
+            "plan7": "7 Days - $35",
+            "plan15": "15 Days - $70",
+            "plan30": "30 Days - $120"
+        }
+
+        text = f"""
+✅ Selected Plan: {plans[call.data]}
+
+💸 Payment Addresses
+
+USDT (TRC20):
+TMEEBvLGrxt8bYuXtLnLp3D5NN6fZPwdJn
+
+USDT (BEP20):
+0x792a59a92f57006f355760a2821689ff28324109
+
+After payment, send your TXID to admin.
+"""
+
+        bot.edit_message_text(
+            text,
+            call.message.chat.id,
+            call.message.message_id
+        )
+
+print("Bot Running...")
+bot.infinity_polling()
